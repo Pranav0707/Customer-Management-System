@@ -19,5 +19,7 @@ urlpatterns = [
     path('',views.Home,name='home' ),
     path('orderform/<str:pk>',views.orderform,name='orderform' ),
     path('updateorder/<str:pk>',views.updateorder,name='updateorder' ),
-    path('deleteorder/<str:pk>',views.deleteorder,name='deleteorder')
+    path('deleteorder/<str:pk>',views.deleteorder,name='deleteorder'),
+    path('create_user_order/<str:id>',views.create_user_order,name="create_user_order"),
+    path('create_customer',views.create_customer,name="create_customer")
 ]

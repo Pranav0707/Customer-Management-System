@@ -6,7 +6,7 @@
         <div class="col-md">   
             <div class="card card-body">
                 <h4>Products</h4>
-                <table class="table"> 
+                <table class="table table-bordered table-striped"> 
                     <tr>
                         <th>Product</th>
                         <th>Category</th>
@@ -20,6 +20,21 @@
                         </tr>
                     {% endfor %}
                 </table>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md">   
+            <div class="card card-body">
+                <h4>Add Product</h4>
+                <form method="POST" action="">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        {{product_form.as_p}}
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </form>
             </div>
         </div>
     </div>

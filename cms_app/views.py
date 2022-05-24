@@ -1,9 +1,9 @@
 from django.db.models import fields, query
-from django.shortcuts import render,redirect
+from django.shortcuts import get_object_or_404, render,redirect
 from django.http import HttpResponse
 from django.forms import inlineformset_factory
 from cms_app.decorators import allowed_user, unauthenticated,admin_only
-from cms_app.forms import CustomerForm, OrderForm,RegistrationForm
+from cms_app.forms import  CreateCustomerForm, CustomerForm, OrderForm, ProductForm,RegistrationForm, UserOrderForm
 from django.contrib.auth.models import Group
 from django.contrib import messages
 from django.contrib.auth import authenticate,login,logout
@@ -107,7 +107,12 @@ def Home(request):
 @allowed_user(allowed_roles=['admin'])
 def product(request):
     product=Product.objects.all()
-    context={'product':product}
+    product_form=ProductForm()
+    if request.method=="POST":
+        product_form=ProductForm(request.POST)
+        if product_form.is_valid():
+            product_form.save()
+    context={'product':product,"product_form":product_form}
     return render(request,'cms_app/product.html',context)
 
 @login_required(login_url='login')
@@ -124,7 +129,7 @@ def customer(request,pk):
 @login_required(login_url='login')
 @allowed_user(allowed_roles=['admin'])
 def orderform(request,pk):
-    OrderFormSet=inlineformset_factory(Customer,Order,fields=('product','status'),extra=10)
+    OrderFormSet=inlineformset_factory(Customer,Order,fields=('product','status'),extra=3)
     customer=Customer.objects.get(id=pk)
     formset=OrderFormSet(queryset=Order.objects.none(),instance=customer)
     #form=OrderForm(initial={'customer':customer})
@@ -133,7 +138,7 @@ def orderform(request,pk):
     if request.method=='POST':
        #form=OrderForm(request.POST)
        formset=OrderFormSet(request.POST,instance=customer)
-       if formset.is_valid:
+       if formset.is_valid():
            formset.save()
            return redirect('/')
     context={'formset':formset}
@@ -161,3 +166,33 @@ def deleteorder(request,pk):
         return redirect('/')
     context={'deleteorder':deleteorder}
     return render(request,'cms_app/deleteorder.html',context)
+
+@login_required
+def create_user_order(request,id):
+    try:
+        customer=get_object_or_404(Customer,id=id)
+        print(customer)
+    except Exception as e:
+        customer=None
+        print(e)
+    form=UserOrderForm()
+    customer=request.user.customer
+    if request.method=="POST":
+        form=UserOrderForm(request.POST)
+        if form.is_valid():
+            instance=form.save(commit=False)
+            instance.customer=customer
+            instance.save()
+
+    context={"form":form}
+    return render(request,'cms_app/create_user_order.html',context)
+
+def create_customer(request):
+    form=CreateCustomerForm()
+    
+    if request.method=="POST":
+        form=CreateCustomerForm(request.POST)
+        if form.is_valid():
+            form.save()
+    context={"form":form}
+    return render(request,'cms_app/create_customer.html',context)
